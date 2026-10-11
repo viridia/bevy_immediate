@@ -5,8 +5,8 @@ use bevy_ecs::{
     query::{With, Without},
     resource::{IsResource, ResourceEntities},
     system::{
-        Query, QueryParamBuilder, SystemMeta, SystemParam, SystemParamBuilder,
-        SystemParamValidationError,
+        Query, QueryParamBuilder, SystemMeta, SystemParam, SystemParamAccessConflict,
+        SystemParamBuilder, SystemParamValidationError,
     },
     world::{FilteredEntityMut, World},
 };
@@ -55,9 +55,8 @@ unsafe impl<Caps: CapSet> SystemParam for ImmCapQueryParam<'_, '_, Caps> {
         state: &Self::State,
         system_meta: &mut SystemMeta,
         system_access: &mut bevy_ecs::system::SystemAccess,
-        world: &mut World,
-    ) {
-        Query::init_access(&state.state, system_meta, system_access, world)
+    ) -> Result<(), SystemParamAccessConflict> {
+        Query::init_access(&state.state, system_meta, system_access)
     }
 
     fn apply(state: &mut Self::State, system_meta: &SystemMeta, world: &mut World) {
@@ -160,12 +159,11 @@ unsafe impl<Caps: CapSet> SystemParam for ImmCapResourcesParam<'_, '_, Caps> {
         state: &Self::State,
         system_meta: &mut SystemMeta,
         system_access: &mut bevy_ecs::system::SystemAccess,
-        world: &mut World,
-    ) {
-        Query::init_access(&state.state, system_meta, system_access, world);
+    ) -> Result<(), SystemParamAccessConflict> {
+        Query::init_access(&state.state, system_meta, system_access)?;
         // `get_param` also borrows `ResourceEntities` and `Components` from the world
-        <&ResourceEntities as SystemParam>::init_access(&(), system_meta, system_access, world);
-        <&Components as SystemParam>::init_access(&(), system_meta, system_access, world);
+        <&ResourceEntities as SystemParam>::init_access(&(), system_meta, system_access)?;
+        <&Components as SystemParam>::init_access(&(), system_meta, system_access)
     }
 }
 

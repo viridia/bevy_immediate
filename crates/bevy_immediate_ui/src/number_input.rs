@@ -1,5 +1,5 @@
 use bevy_ecs::hierarchy::Children;
-use bevy_feathers::controls::NumberInputValue;
+use bevy_ui_widgets::NumericValue;
 use bevy_input_focus::InputFocus;
 
 use crate::track_value_change_plugin::{NewValueChange, TrackValueChangePlugin};
@@ -24,7 +24,7 @@ fn register_number_input_value<T>(
     app: &mut bevy_app::App,
     cap_req: &mut ImmCapAccessRequests<impl CapSet>,
 ) where
-    T: ImmUiNumberInputValue,
+    T: ImmUiNumericValue,
 {
     cap_req.request_component_write::<NewValueChange<T>>(app.world_mut());
     cap_req.request_resource_read::<InputFocus>(app.world_mut());
@@ -38,12 +38,12 @@ fn register_number_input_value<T>(
 /// Synchronises a [`FeathersNumberInput`] widget with stored application state.
 pub trait ImmUiNumberInput {
     /// Synchronises a [`FeathersNumberInput`] widget with stored application state.
-    fn number_input<T: ImmUiNumberInputValue>(self, value: &mut T) -> Self;
+    fn number_input<T: ImmUiNumericValue>(self, value: &mut T) -> Self;
 
     /// Synchronise value using a get/set callback.
     ///
     /// Useful for values that could contain invalid intermediate state while editing.
-    fn number_input_get_set<T: ImmUiNumberInputValue>(
+    fn number_input_get_set<T: ImmUiNumericValue>(
         self,
         get_set: impl FnMut(Option<T>) -> T,
     ) -> Self;
@@ -53,7 +53,7 @@ impl<Cap> ImmUiNumberInput for ImmEntity<'_, '_, '_, Cap>
 where
     Cap: ImplCap<CapabilityUiNumberInput>,
 {
-    fn number_input_get_set<T: ImmUiNumberInputValue>(
+    fn number_input_get_set<T: ImmUiNumericValue>(
         mut self,
         mut get_set: impl FnMut(Option<T>) -> T,
     ) -> Self {
@@ -103,7 +103,7 @@ where
         self
     }
 
-    fn number_input<T: ImmUiNumberInputValue>(mut self, value: &mut T) -> Self {
+    fn number_input<T: ImmUiNumericValue>(mut self, value: &mut T) -> Self {
         let value_hash = value.hash_bits();
         let mut helper = ImmLocalHashMemoryHelper::new(&mut self, T::memory_key(), &value_hash);
 
@@ -141,10 +141,10 @@ where
     }
 }
 
-/// Maps application number types to [`NumberInputValue`].
-pub trait ImmUiNumberInputValue: Copy + Clone + PartialEq + Send + Sync + 'static {
-    /// Widget value for [`NumberInputValue`].
-    fn to_number_input_value(self) -> NumberInputValue;
+/// Maps application number types to [`NumericValue`].
+pub trait ImmUiNumericValue: Copy + Clone + PartialEq + Send + Sync + 'static {
+    /// Widget value for [`NumericValue`].
+    fn to_number_input_value(self) -> NumericValue;
 
     /// Per-type immediate-mode hash memory key.
     fn memory_key() -> &'static str;
@@ -153,9 +153,9 @@ pub trait ImmUiNumberInputValue: Copy + Clone + PartialEq + Send + Sync + 'stati
     fn hash_bits(self) -> u64;
 }
 
-impl ImmUiNumberInputValue for f32 {
-    fn to_number_input_value(self) -> NumberInputValue {
-        NumberInputValue::F32(self)
+impl ImmUiNumericValue for f32 {
+    fn to_number_input_value(self) -> NumericValue {
+        NumericValue::F32(self)
     }
 
     fn memory_key() -> &'static str {
@@ -167,9 +167,9 @@ impl ImmUiNumberInputValue for f32 {
     }
 }
 
-impl ImmUiNumberInputValue for f64 {
-    fn to_number_input_value(self) -> NumberInputValue {
-        NumberInputValue::F64(self)
+impl ImmUiNumericValue for f64 {
+    fn to_number_input_value(self) -> NumericValue {
+        NumericValue::F64(self)
     }
 
     fn memory_key() -> &'static str {
@@ -181,9 +181,9 @@ impl ImmUiNumberInputValue for f64 {
     }
 }
 
-impl ImmUiNumberInputValue for i32 {
-    fn to_number_input_value(self) -> NumberInputValue {
-        NumberInputValue::I32(self)
+impl ImmUiNumericValue for i32 {
+    fn to_number_input_value(self) -> NumericValue {
+        NumericValue::I32(self)
     }
 
     fn memory_key() -> &'static str {
@@ -195,9 +195,9 @@ impl ImmUiNumberInputValue for i32 {
     }
 }
 
-impl ImmUiNumberInputValue for i64 {
-    fn to_number_input_value(self) -> NumberInputValue {
-        NumberInputValue::I64(self)
+impl ImmUiNumericValue for i64 {
+    fn to_number_input_value(self) -> NumericValue {
+        NumericValue::I64(self)
     }
 
     fn memory_key() -> &'static str {
