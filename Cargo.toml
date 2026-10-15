@@ -87,7 +87,6 @@ bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main", defaul
   "bevy_input_focus",
   "default_font",
   "ui_picking",
-  "ghost_nodes",
   "png",
   "custom_cursor",
 
